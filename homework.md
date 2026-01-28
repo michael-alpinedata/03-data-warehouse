@@ -57,6 +57,8 @@ FROM `dtc-zoomcamp-2026.nytaxi.yellow_tripdata_2024_hw`;
 - 2.14 GB for the External Table and 0MB for the Materialized Table
 - 0 MB for the External Table and 0MB for the Materialized Table
 
+The estimated amount of data read for the external table is 0 Mb because the data have not been loaded in BQ yet (still in GCS) so impossible for BQ to estimate it.
+
 ## Question 3:
 Write a query to retrieve the PULocationID from the table (not the external table) in BigQuery. Now write a query to retrieve the PULocationID and DOLocationID on the same table.</br> 
 Why are the estimated number of Bytes different?</br> 
@@ -118,16 +120,14 @@ Choose the answer which most closely matches.</br>
 -- question 6
 SELECT DISTINCT(VendorID)
 FROM `dtc-zoomcamp-2026.nytaxi.yellow_tripdata_2024_hw`
-WHERE '2024-03-01' <= DATE(tpep_dropoff_datetime) 
-AND DATE(tpep_dropoff_datetime) <= '2024-03-15';
+WHERE DATE(tpep_dropoff_datetime) BETWEEN '2024-03-01' AND '2024-03-15';
 
 SELECT DISTINCT(VendorID)
-FROM `dtc-zoomcamp-2026.nytaxi.yellow_tripdata_2024_hw_partitioned_clustered`
-WHERE '2024-03-01' <= DATE(tpep_dropoff_datetime) 
-AND DATE(tpep_dropoff_datetime) <= '2024-03-15';
+FROM `dtc-zoomcamp-2026.nytaxi.yellow_tripdata_2024_partitioned_clustered`
+WHERE DATE(tpep_dropoff_datetime) BETWEEN '2024-03-01' AND '2024-03-15';
 ```
-![materialized]({A98B1D12-2266-4DB7-891B-66A1C9E7B819}.png)
-![partitioned + clustered]({08CAA6AC-206B-498A-A792-6F0EE0B03C52}.png)
+![materialized]({21BD9801-1FB2-4750-9476-58C905CDC847}.png)
+![partitioned + clustered]({5F7CFFEF-5838-4999-9398-1B31A335D914}.png)
 - 12.47 MB for non-partitioned table and 326.42 MB for the partitioned table
 - X 310.24 MB for non-partitioned table and 26.84 MB for the partitioned table
 - 5.87 MB for non-partitioned table and 0 MB for the partitioned table
@@ -146,8 +146,26 @@ Where is the data stored in the External Table you created?
 It is best practice in Big Query to always cluster your data:
 - True
 - X False
-If you always order your data in the same way, it can be considered good practice, but we don't necessarily query data the same way.
-Plus it's interesting if the column you want to cluster has a high cardinality (if low cardinality, prefer partitioning)
+
+Clustering or partitioning is interesting when:
+- your queries filter always on a peculiar column (or up to 4 peculiar columns)
+
+Let's do a decision tree on: 
+- clustering
+- partitioning 
+- do nothing.
+
+Will we most often filter or sort our data based on a peculiar column (or up to 4 columns)?
+- No: no partitioning nor clustering
+- Yes:
+  - will the partitions size of the first column be at least 1 Gb ?
+    - Yes:
+      - will the cardinality of the column be < 4 000 values (BQ limit)?
+        - Yes: partition 1st column, cluster your other column(s) (up to 4) if needed
+        - No: cluster your column(s) (up to 4)
+    - No: cluster your column(s) (up to 4)
+
+
 
 ## (Bonus: Not worth points) Question 9:
 No Points: Write a `SELECT count(*)` query FROM the materialized table you created. How many bytes does it estimate will be read? Why?
@@ -156,12 +174,6 @@ No Points: Write a `SELECT count(*)` query FROM the materialized table you creat
 SELECT count(*)
 FROM dtc-zoomcamp-2026.nytaxi.yellow_tripdata_2024_hw;
 ```
-It reads no bytes at all because this information is already known since the table creation. It's just the number of rows in the table and it's stored in the metadata of the table.
+It reads no bytes at all because this information is already known since the table creation. </br>
+It's just the number of rows in the table and it's stored in the metadata of the table.
 
-## Submitting the solutions
-
-Form for submitting: https://courses.datatalks.club/de-zoomcamp-2026/homework/hw3
-
-## Solution
-
-Solution: https://www.youtube.com/watch?v=wpLmImIUlPg
