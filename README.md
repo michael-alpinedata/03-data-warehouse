@@ -170,7 +170,7 @@ Will we most often filter or sort our data based on a peculiar column (or up to 
 ## (Bonus: Not worth points) Question 9:
 No Points: Write a `SELECT count(*)` query FROM the materialized table you created. How many bytes does it estimate will be read? Why?
 ```sql 
--- question 8 
+-- question 9 
 SELECT count(*)
 FROM dtc-zoomcamp-2026.nytaxi.yellow_tripdata_2024_hw;
 ```
