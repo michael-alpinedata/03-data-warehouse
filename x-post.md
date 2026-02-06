@@ -15,4 +15,4 @@ https://github.com/DataTalksClub/data-engineering-zoomcamp
 
 
 post link:
-https://x.com/MichalG55278768/status/2015433972239433803?s=20
+https://x.com/MichalG55278768/status/2019694434880016776?s=20
